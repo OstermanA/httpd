@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
-<project name="httpd 1.10.3" default="main" basedir="..">
+<project name="httpd 1.10.3" default="main" basedir=".">
   <!-- apr properties -->
-  <property name="apr.file" value="apr-1.5.2.tar.bz2"/>
-  <property name="apr.dir" value="apr-1.5.2"/>
+  <property name="apr.file" value="apr-1.6.2.tar.bz2"/>
+  <property name="apr.dir" value="apr-1.6.2"/>
   <!-- apr-util properties -->
-  <property name="aprutil.file" value="apr-util-1.5.4.tar.bz2"/>
-  <property name="aprutil.dir" value="apr-util-1.5.4"/>
+  <property name="aprutil.file" value="apr-util-1.6.0.tar.bz2"/>
+  <property name="aprutil.dir" value="apr-util-1.6.0"/>
   <!-- curl properties -->
   <property name="curl.file" value="curl-7.54.0.tar.bz2"/>
   <property name="curl.dir" value="curl-7.54.0"/>
@@ -25,7 +25,7 @@
   <property name="zlib.file" value="zlib-1.2.11.tar.gz"/>
   <property name="zlib.dir" value="zlib-1.2.11"/>
   <!-- Project properties -->
-  <property name="install.base" value="/servers/www-root"/>
+  <property name="install.base" value="/sites/opt"/>
   <property name="install.dir" value="${install.base}/HTTPD/${httpd.dir}_${modsecurity.dir}"/>
   <property name="openssl.dir" value="${install.base}/openssl"/>
   <property name="cflags" value="-Wl,-rpath,${install.dir}/lib,-rpath,${openssl.dir}/lib"/>
@@ -158,11 +158,13 @@
     <exec executable="make" dir="${curl.dir}" failonerror="true">
       <arg value="-j6"/>
     </exec>
+<!-- TODO: Skipping 'make check' because of false positives from Valgrind
     <echo message="Running 'make check'" level="info"/>
     <exec executable="make" dir="${curl.dir}" failonerror="true">
       <arg value="check"/>
       <arg value="-j6"/>
     </exec>
+-->
     <exec executable="make" dir="${curl.dir}" failonerror="true">
       <arg value="install"/>
     </exec>

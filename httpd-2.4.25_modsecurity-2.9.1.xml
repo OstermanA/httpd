@@ -18,6 +18,9 @@
   <!-- modsecurity properties -->
   <property name="modsecurity.file" value="modsecurity-2.9.1.tar.gz"/>
   <property name="modsecurity.dir" value="modsecurity-2.9.1"/>
+  <!-- OpenSSL properties -->
+  <property name="openssl.file" value="openssl-1.0.2l.tar.gz"/>
+  <property name="openssl.dir" value="openssl-1.0.2l"/>
   <!-- pcre properties -->
   <property name="pcre.file" value="pcre-8.40.tar.bz2"/>
   <property name="pcre.dir" value="pcre-8.40"/>
@@ -25,15 +28,14 @@
   <property name="zlib.file" value="zlib-1.2.11.tar.gz"/>
   <property name="zlib.dir" value="zlib-1.2.11"/>
   <!-- Project properties -->
-  <property name="install.base" value="/sites/opt"/>
-  <property name="install.dir" value="${install.base}/HTTPD/${httpd.dir}_${modsecurity.dir}"/>
-  <property name="openssl.dir" value="${install.base}/openssl"/>
-  <property name="cflags" value="-Wl,-rpath,${install.dir}/lib,-rpath,${openssl.dir}/lib"/>
+  <property name="install.dir" value="/sites/opt/HTTPD/${httpd.dir}_${modsecurity.dir}"/>
+  <property name="cflags" value="-Wl,-z,origin,-rpath,\$$$ORIGIN/../lib"/>
   <property name="cppflags" value="${cflags}"/>
   <!-- DO NOT MODIFY ANYTHING BELOW HERE -->
   <target name="main">
     <antcall target="sanitytest"/>
     <antcall target="clean"/>
+    <antcall target="buildopenssl"/>
     <antcall target="buildzlib"/>
     <antcall target="buildcurl"/>
     <antcall target="buildlibxml2"/>
@@ -51,6 +53,7 @@
     <available file="${httpd.file}" property="httpd.file.exists"/>
     <available file="${libxml2.file}" property="libxml2.file.exists"/>
     <available file="${modsecurity.file}" property="modsecurity.file.exists"/>
+    <available file="${openssl.file}" property="openssl.file.exists"/>
     <available file="${pcre.file}" property="pcre.file.exists"/>
     <available file="${zlib.file}" property="zlib.file.exists"/>
     <fail message="${apr.file} does not exist" unless="apr.file.exists"/>
@@ -59,6 +62,7 @@
     <fail message="${httpd.file} does not exist" unless="httpd.file.exists"/>
     <fail message="${libxml2.file} does not exist" unless="libxml2.file.exists"/>
     <fail message="${modsecurity.file} does not exist" unless="modsecurity.file.exists"/>
+    <fail message="${openssl.file} does not exist" unless="openssl.file.exists"/>
     <fail message="${pcre.file} does not exist" unless="pcre.file.exists"/>
     <fail message="${zlib.file} does not exist" unless="zlib.file.exists"/>
   </target>
@@ -70,6 +74,7 @@
     <delete dir="${httpd.dir}"/>
     <delete dir="${libxml2.dir}"/>
     <delete dir="${modsecurity.dir}"/>
+    <delete dir="${openssl.dir}"/>
     <delete dir="${pcre.dir}"/>
     <delete dir="${zlib.dir}"/>
   </target>
@@ -119,7 +124,7 @@
       <arg value="--prefix=${install.dir}"/>
       <arg value="--with-apr=${install.dir}"/>
       <arg value="--with-crypto"/>
-      <arg value="--with-openssl=${openssl.dir}"/>
+      <arg value="--with-openssl=${install.dir}"/>
     </exec>
     <echo message="Running 'make'" level="info"/>
     <exec executable="make" dir="${aprutil.dir}" failonerror="true">
@@ -153,7 +158,7 @@
       <arg value="--disable-threaded-resolver"/>
       <arg value="--enable-cookies"/>
       <arg value="--with-zlib=${install.dir}"/>
-      <arg value="--with-ssl=${openssl.dir}"/>    </exec>
+      <arg value="--with-ssl=${install.dir}"/>    </exec>
     <echo message="Running 'make'" level="info"/>
     <exec executable="make" dir="${curl.dir}" failonerror="true">
       <arg value="-j6"/>
@@ -187,7 +192,7 @@
       <arg value="--with-apr-util=${install.dir}"/>
       <arg value="--with-pcre=${install.dir}"/>
       <arg value="--with-z=${install.dir}"/>
-      <arg value="--with-ssl=${openssl.dir}"/>
+      <arg value="--with-ssl=${install.dir}"/>
     </exec>
     <echo message="Running 'make'" level="info"/>
     <exec executable="make" dir="${httpd.dir}" failonerror="true">
@@ -268,6 +273,43 @@
     <exec executable="chmod" dir="${install.dir}/modules" failonerror="true">
       <arg value="a+x"/>
       <arg value="mod_security2.so"/>
+    </exec>
+  </target>
+  <target name="buildopenssl">
+    <echo message="Building ${openssl.dir}" level="info"/>
+    <echo message="Unpacking ${openssl.file}" level="info"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${openssl.file}"/>
+    </exec>
+    <echo message="Configuring ${openssl.dir}" level="info"/>
+    <exec executable="bash" dir="${openssl.dir}" failonerror="true">
+      <env key="CFLAGS" value="${cflags}"/>
+      <env key="CPPFLAGS" value="${cppflags}"/>
+      <arg value="config"/>
+      <arg value="--prefix=${install.dir}"/>
+      <arg value="--openssldir=${install.dir}"/>
+      <arg value="threads"/>
+      <arg value="shared"/>
+      <arg value="no-comp"/>
+      <arg value="${cflags}"/>
+    </exec>
+   <echo message="Running 'make depend'" level="info"/>
+    <exec executable="make" dir="${openssl.dir}" failonerror="true">
+      <arg value="depend"/>
+      <arg value="-j6"/>
+    </exec>
+    <echo message="Running 'make'" level="info"/>
+    <exec executable="make" dir="${openssl.dir}" failonerror="true">
+      <arg value="-j6"/>
+    </exec>
+    <echo message="Running 'make test'" level="info"/>
+    <exec executable="make" dir="${openssl.dir}" failonerror="true">
+      <arg value="test"/>
+    </exec>
+    <echo message="Running 'make install'" level="info"/>
+    <exec executable="make" dir="${openssl.dir}" failonerror="true">
+      <arg value="install"/>
     </exec>
   </target>
   <target name="buildpcre">

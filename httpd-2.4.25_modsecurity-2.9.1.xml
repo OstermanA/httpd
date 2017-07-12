@@ -128,12 +128,10 @@
     </exec>
     <echo message="Running 'make'" level="info"/>
     <exec executable="make" dir="${aprutil.dir}" failonerror="true">
-      <arg value="-j6"/>
     </exec>
     <echo message="Running 'make check'" level="info"/>
     <exec executable="make" dir="${aprutil.dir}" failonerror="true">
       <arg value="check"/>
-      <arg value="-j6"/>
     </exec>
     <echo message="Running 'make install'" level="info"/>
     <exec executable="make" dir="${aprutil.dir}" failonerror="true">

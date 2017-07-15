@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+
+function init {
+  echo -n "Checking chrpath: "
+  if which chrpath &>/dev/null; then
+    echo "OK"
+  else
+    echo "Failed"
+    echo "'chrpath' is required"
+    exit
+  fi
+
+  echo -n "Checking install dir: "
+  if [[ -d "$install_dir" ]]; then
+    echo "OK"
+  else
+    echo "Failed"
+    echo "$install_dir does not exist"
+    exit 1
+  fi
+}
+
+function find_all_elfs {
+  find "$1" -type f | while read file; do
+    [[ $(file $file) =~ ELF ]] && echo $file
+  done
+}
+
+export install_dir="$1"
+
+init
+
+find_all_elfs "$install_dir" | while read elf; do
+  if [[ $(chrpath "$elf") =~ XORIGIN && ( $(ldd $elf) =~ "not found" || $(ldd $elf) =~ $install_dir )]]; then
+    rpath='$ORIGIN/../lib:$ORIGIN/../../lib'
+    chmod 755 "$elf"
+    chrpath -r "$rpath" "$elf" || echo "ERROR: Failed to update $elf"
+  fi
+done

@@ -29,7 +29,7 @@
   <property name="zlib.dir" value="zlib-1.2.11"/>
   <!-- Project properties -->
   <property name="install.dir" value="/sites/opt/HTTPD/${httpd.dir}_${modsecurity.dir}"/>
-  <property name="cflags" value="-Wl,-z,origin,-rpath,\$$$ORIGIN/../lib"/>
+  <property name="cflags" value="-Wl,-z,origin,-rpath,XORIGIN/../lib,-rpath,XORIGIN/../../lib"/>
   <property name="cppflags" value="${cflags}"/>
   <!-- DO NOT MODIFY ANYTHING BELOW HERE -->
   <target name="main">
@@ -44,6 +44,7 @@
     <antcall target="buildpcre"/>
     <antcall target="buildhttpd"/>
     <antcall target="buildmodsecurity"/>
+    <antcall target="fixrpath"/>
     <antcall target="clean"/>
   </target>
   <target name="sanitytest">
@@ -77,6 +78,13 @@
     <delete dir="${openssl.dir}"/>
     <delete dir="${pcre.dir}"/>
     <delete dir="${zlib.dir}"/>
+  </target>
+  <target name="fixrpath">
+    <echo message="Fixing ELF rpaths"/>
+    <exec executable="bash" failonerror="true">
+      <arg value="fix_rpath"/>
+      <arg value="${install.dir}"/>
+    </exec>
   </target>
   <target name="buildapr">
     <echo message="Building ${apr.dir}" level="info"/>

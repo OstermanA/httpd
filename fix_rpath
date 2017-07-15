@@ -36,4 +36,5 @@ find_all_elfs "$install_dir" | while read elf; do
     chmod 755 "$elf"
     chrpath -r "$rpath" "$elf" || echo "ERROR: Failed to update $elf"
   fi
+  chmod 555 "$elf"
 done

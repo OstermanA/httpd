@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<project
+    name="chrpath"
+    default="main">
+
+  <!-- OpenSSL properties -->
+  <property name="chrpath.file" value="chrpath-0.16.tar.gz"/>
+  <property name="chrpath.dir" value="chrpath-0.16"/>
+
+  <!-- Project properties -->
+  <property name="install.dir" value="${basedir}/chrpath"/>
+  <property name="cflags" value="-Wl,-rpath,${install.dir}/lib"/>
+  <property name="cppflags" value="${cflags}"/>
+
+  <!-- DO NOT MODIFY ANYTHING BELOW HERE -->
+  <target name="main">
+    <echo message="XXXXXXXXXX basedir: ${basedir} XXXXXXXXXX"/>
+    <echo message="XXXXXXXXXX install.dir: ${install.dir} XXXXXXXXXX"/>
+    <antcall target="sanitytest"/>
+    <antcall target="clean"/>
+    <antcall target="unpack"/>
+    <antcall target="configure"/>
+    <antcall target="make"/>
+    <antcall target="test"/>
+    <antcall target="install"/>
+    <antcall target="clean"/>
+  </target>
+
+  <target name="sanitytest">
+    <available file="${chrpath.file}" property="chrpath.file.exists"/>
+    <fail message="${chrpath.file} does not exist" unless="chrpath.file.exists"/>
+  </target>
+
+  <target name="clean">
+    <echo message="Removing build artifacts" level="info"/>
+    <delete dir="${chrpath.dir}"/>
+  </target>
+
+  <target name="unpack">
+    <echo message="Unpacking files" level="info"/>
+
+    <echo message="Unpacking ${chrpath.file}" level="info"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${chrpath.file}"/>
+    </exec>
+  </target>
+
+  <target name="configure">
+    <echo message="Running config" level="info"/>
+    <exec executable="bash" dir="${chrpath.dir}" failonerror="true">
+      <env key="CFLAGS" value="${cflags}"/>
+      <env key="CPPFLAGS" value="${cppflags}"/>
+      <arg value="configure"/>
+      <arg value="--prefix=${install.dir}"/>
+    </exec>
+  </target>
+
+  <target name="make">
+    <echo message="Running 'make'" level="info"/>
+    <exec executable="make" dir="${chrpath.dir}" failonerror="true"/>
+  </target>
+
+  <target name="test">
+    <echo message="Running 'make check'" level="info"/>
+    <exec executable="make" dir="${chrpath.dir}" failonerror="true">
+      <arg value="check"/>
+    </exec>
+  </target>
+
+  <target name="install">
+    <echo message="Running 'make install'" level="info"/>
+    <exec executable="make" dir="${chrpath.dir}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+  </target>
+
+</project>

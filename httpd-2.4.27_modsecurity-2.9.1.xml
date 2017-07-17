@@ -28,7 +28,7 @@
   <property name="zlib.file" value="zlib-1.2.11.tar.gz"/>
   <property name="zlib.dir" value="zlib-1.2.11"/>
   <!-- Project properties -->
-  <property name="install.dir" value="/sites/opt/HTTPD/${httpd.dir}_${modsecurity.dir}"/>
+  <property name="install.dir" value="${basedir}/${httpd.dir}_${modsecurity.dir}"/>
   <property name="cflags" value="-Wl,-z,origin,-rpath,XORIGIN/../lib,-rpath,XORIGIN/../../lib"/>
   <property name="cppflags" value="${cflags}"/>
   <!-- DO NOT MODIFY ANYTHING BELOW HERE -->

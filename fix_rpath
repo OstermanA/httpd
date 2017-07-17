@@ -31,7 +31,7 @@ export install_dir="$1"
 init
 
 find_all_elfs "$install_dir" | while read elf; do
-  if [[ $(chrpath "$elf") =~ XORIGIN && ( $(ldd $elf) =~ "not found" || $(ldd $elf) =~ $install_dir )]]; then
+  if [[ $(readelf -d "$elf") =~ XORIGIN ]]; then
     rpath='$ORIGIN/../lib:$ORIGIN/../../lib'
     chmod 755 "$elf"
     chrpath -r "$rpath" "$elf" || echo "ERROR: Failed to update $elf"

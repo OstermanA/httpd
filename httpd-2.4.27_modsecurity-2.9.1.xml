@@ -31,6 +31,7 @@
   <property name="install.dir" value="${basedir}/${httpd.dir}_${modsecurity.dir}"/>
   <property name="cflags" value="-Wl,-z,origin,-rpath,XORIGIN/../lib,-rpath,XORIGIN/../../lib"/>
   <property name="cppflags" value="${cflags}"/>
+  <property environment="env"/>
   <!-- DO NOT MODIFY ANYTHING BELOW HERE -->
   <target name="main">
     <antcall target="sanitytest"/>
@@ -81,7 +82,9 @@
   </target>
   <target name="fixrpath">
     <echo message="Fixing ELF rpaths"/>
+    <ant antfile="chrpath-0.16.xml" inheritAll="false"/>
     <exec executable="bash" failonerror="true">
+      <env key="PATH" value="${basedir}/chrpath/bin:${env.PATH}"/>
       <arg value="fix_rpath"/>
       <arg value="${install.dir}"/>
     </exec>
@@ -357,6 +360,11 @@
       <arg value="-xf"/>
       <arg value="${zlib.file}"/>
     </exec>
+    <echo message="Running 'make distclean'" level="info"/>
+    <exec executable="make" dir="${zlib.dir}" failonerror="true">
+      <arg value="distclean"/>
+      <arg value="-j6"/>
+    </exec>
     <echo message="Configuring ${zlib.dir}" level="info"/>
     <exec executable="bash" dir="${zlib.dir}" failonerror="true">
       <env key="CFLAGS" value="${cflags} -fPIC"/>
@@ -365,7 +373,8 @@
       <arg value="--prefix=${install.dir}"/>
       <arg value="--64"/>
       <arg value="--shared"/>
-      <arg value="--static"/>
+      <arg value="--libdir=${install.dir}/lib"/>
+      <arg value="--sharedlibdir=${install.dir}/lib"/>
     </exec>
     <echo message="Running 'make'" level="info"/>
     <exec executable="make" dir="${zlib.dir}" failonerror="true">

@@ -142,6 +142,7 @@
       <arg value="configure"/>
       <arg value="--prefix=${install.dir}"/>
       <arg value="--with-apr=${install.dir}"/>
+      <arg value="--with-expat=${install.dir}"/>
       <arg value="--with-crypto"/>
       <arg value="--with-openssl=${install.dir}"/>
     </exec>

@@ -1,0 +1,530 @@
+<?xml version="1.0"?>
+<project name="httpd 1.10.3" default="main" basedir=".">
+  <!-- apr properties -->
+  <property name="apr.file" value="apr-1.6.3.tar.bz2"/>
+  <property name="apr.dir" value="apr-1.6.3"/>
+  <!-- apr-util properties -->
+  <property name="aprutil.file" value="apr-util-1.6.1.tar.bz2"/>
+  <property name="aprutil.dir" value="apr-util-1.6.1"/>
+  <!-- chrpath properties -->
+  <property name="chrpath.file" value="chrpath-0.16.tar.gz"/>
+  <property name="chrpath.dir" value="chrpath-0.16"/>
+  <!-- curl properties -->
+  <property name="curl.file" value="curl-7.59.0.tar.bz2"/>
+  <property name="curl.dir" value="curl-7.59.0"/>
+  <!-- dispatcher properties -->
+  <property name="dispatcher.file" value="dispatcher-apache2.4-linux-x86-64-4.2.3.tar.gz"/>
+  <property name="dispatcher.dir" value="dispatcher-apache2.4-linux-x86-64-4.2.3"/>
+  <!-- expat properties -->
+  <property name="expat.file" value="expat-2.2.5.tar.bz2"/>
+  <property name="expat.dir" value="expat-2.2.5"/>
+  <!-- httpd properties -->
+  <property name="httpd.file" value="httpd-2.4.33.tar.bz2"/>
+  <property name="httpd.dir" value="httpd-2.4.33"/>
+  <!-- libxml2 properties -->
+  <property name="libxml2.file" value="libxml2-2.9.8.tar.gz"/>
+  <property name="libxml2.dir" value="libxml2-2.9.8"/>
+  <!-- nghttp2 properties -->
+  <property name="nghttp2.file" value="nghttp2-1.32.0.tar.bz2"/>
+  <property name="nghttp2.dir" value="nghttp2-1.32.0"/>
+  <!-- modsecurity properties -->
+  <property name="modsecurity.file" value="modsecurity-2.9.2.tar.gz"/>
+  <property name="modsecurity.dir" value="modsecurity-2.9.2"/>
+  <!-- OpenSSL properties -->
+  <property name="openssl.file" value="openssl-1.0.2o.tar.gz"/>
+  <property name="openssl.dir" value="openssl-1.0.2o"/>
+  <!-- pcre properties -->
+  <property name="pcre.file" value="pcre-8.42.tar.bz2"/>
+  <property name="pcre.dir" value="pcre-8.42"/>
+  <!-- zlib properties -->
+  <property name="zlib.file" value="zlib-1.2.11.tar.gz"/>
+  <property name="zlib.dir" value="zlib-1.2.11"/>
+  <!-- Project properties -->
+  <property name="install.dir" value="${basedir}/../${httpd.dir}_${modsecurity.dir}"/>
+  <property name="tools.dir" value="${basedir}/tools"/>
+  <property name="cflags" value="-Wl,-z,origin,-rpath,XORIGIN/../lib,-rpath,XORIGIN/../../lib"/>
+  <property name="cppflags" value="${cflags}"/>
+  <property name="threads" value="-j6"/>
+  <property environment="env"/>
+  <!-- DO NOT MODIFY ANYTHING BELOW HERE -->
+  <target name="main">
+    <antcall target="clean"/>
+    <antcall target="buildexpat"/>
+    <antcall target="buildopenssl"/>
+    <antcall target="buildzlib"/>
+    <antcall target="buildcurl"/>
+    <antcall target="buildlibxml2"/>
+    <antcall target="buildnghttp2"/>
+    <antcall target="buildapr"/>
+    <antcall target="buildaprutil"/>
+    <antcall target="buildpcre"/>
+    <antcall target="buildhttpd"/>
+    <antcall target="buildmodsecurity"/>
+    <antcall target="fixrpath"/>
+    <antcall target="installdispatcher"/>
+    <antcall target="clean"/>
+  </target>
+  <target name="sanitytest">
+    <echo message="INFO: Checking we have all the code we need"/>
+    <available file="${apr.file}" property="apr.file.exists"/>
+    <available file="${aprutil.file}" property="aprutil.file.exists"/>
+    <available file="${chrpath.file}" property="chrpath.file.exists"/>
+    <available file="${curl.file}" property="curl.file.exists"/>
+    <available file="${dispatcher.file}" property="dispatcher.file.exists"/>
+    <available file="${expat.file}" property="expat.file.exists"/>
+    <available file="${httpd.file}" property="httpd.file.exists"/>
+    <available file="${libxml2.file}" property="libxml2.file.exists"/>
+    <available file="${modsecurity.file}" property="modsecurity.file.exists"/>
+    <available file="${nghttp2.file}" property="nghttp2.file.exists"/>
+    <available file="${openssl.file}" property="openssl.file.exists"/>
+    <available file="${pcre.file}" property="pcre.file.exists"/>
+    <available file="${zlib.file}" property="zlib.file.exists"/>
+    <fail message="${apr.file} does not exist" unless="apr.file.exists"/>
+    <fail message="${aprutil.file} does not exist" unless="aprutil.file.exists"/>
+    <fail message="${chrpath.file} does not exist" unless="chrpath.file.exists"/>
+    <fail message="${curl.file} does not exist" unless="curl.file.exists"/>
+    <fail message="${dispatcher.file} does not exist" unless="dispatcher.file.exists"/>
+    <fail message="${expat.file} does not exist" unless="expat.file.exists"/>
+    <fail message="${httpd.file} does not exist" unless="httpd.file.exists"/>
+    <fail message="${libxml2.file} does not exist" unless="libxml2.file.exists"/>
+    <fail message="${nghttp2.file} does not exist" unless="nghttp2.file.exists"/>
+    <fail message="${modsecurity.file} does not exist" unless="modsecurity.file.exists"/>
+    <fail message="${openssl.file} does not exist" unless="openssl.file.exists"/>
+    <fail message="${pcre.file} does not exist" unless="pcre.file.exists"/>
+    <fail message="${zlib.file} does not exist" unless="zlib.file.exists"/>
+    <echo message="INFO: Check complete"/>
+  </target>
+  <target name="clean">
+    <echo message="Removing build artifacts" level="info"/>
+    <delete dir="chrpath"/>
+    <delete dir="${apr.dir}"/>
+    <delete dir="${aprutil.dir}"/>
+    <delete dir="${chrpath.dir}"/>
+    <delete dir="${curl.dir}"/>
+    <delete dir="${dispatcher.dir}"/>
+    <delete dir="${expat.dir}"/>
+    <delete dir="${httpd.dir}"/>
+    <delete dir="${libxml2.dir}"/>
+    <delete dir="${nghttp2.dir}"/>
+    <delete dir="${modsecurity.dir}"/>
+    <delete dir="${openssl.dir}"/>
+    <delete dir="${pcre.dir}"/>
+    <delete dir="${zlib.dir}"/>
+    <delete dir="${tools.dir}"/>
+  </target>
+  <target name="fixrpath" depends="sanitytest">
+    <echo message="Fixing ELF rpaths"/>
+    <echo message="Building ${chrpath.dir}" level="info"/>
+    <echo message="Unpacking ${chrpath.file}" level="info"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${chrpath.file}"/>
+    </exec>
+    <echo message="Configuring ${chrpath.dir}" level="info"/>
+    <exec executable="bash" dir="${chrpath.dir}" failonerror="true">
+      <env key="CFLAGS" value="${cflags}"/>
+      <env key="CPPFLAGS" value="${cppflags}"/>
+      <arg value="configure"/>
+      <arg value="--prefix=${tools.dir}"/>
+    </exec>
+    <echo message="Running 'make'" level="info"/>
+    <exec executable="make" dir="${chrpath.dir}" failonerror="true">
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make check'" level="info"/>
+    <exec executable="make" dir="${chrpath.dir}" failonerror="true">
+      <arg value="check"/>
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make install'" level="info"/>
+    <exec executable="make" dir="${chrpath.dir}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+    <exec executable="bash" failonerror="true">
+      <env key="PATH" value="${basedir}/chrpath/bin:${env.PATH}"/>
+      <arg value="fix_rpath"/>
+      <arg value="${install.dir}"/>
+    </exec>
+  </target>
+  <target name="installdispatcher" depends="sanitytest">
+    <echo message="Installing AEM Dispatcher" level="info"/>
+    <echo message="Extracting ${dispatcher.file}" level="info"/>
+    <mkdir dir="${dispatcher.dir}"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${dispatcher.file}"/>
+      <arg value="-C"/>
+      <arg value="${dispatcher.dir}"/>
+    </exec>
+    <echo message="Installing ${dispatcher.dir}" level="info"/>
+    <move todir="${install.dir}/modules">
+      <fileset dir="${dispatcher.dir}">
+        <include name="**/*.so"/>
+      </fileset>
+    </move>
+  </target>
+  <target name="buildapr" depends="sanitytest">
+    <echo message="Building ${apr.dir}" level="info"/>
+    <echo message="Unpacking ${apr.file}" level="info"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${apr.file}"/>
+    </exec>
+    <echo message="Creating libtoolT as a patch" level="info"/>
+    <touch file="${apr.dir}/libtoolT"/>
+    <echo message="Configuring ${apr.dir}" level="info"/>
+    <exec executable="bash" dir="${apr.dir}" failonerror="true">
+      <env key="CFLAGS" value="${cflags}"/>
+      <env key="CPPFLAGS" value="${cppflags}"/>
+      <arg value="configure"/>
+      <arg value="--prefix=${install.dir}"/>
+      <arg value="--enable-threads"/>
+    </exec>
+    <echo message="Running 'make'" level="info"/>
+    <exec executable="make" dir="${apr.dir}" failonerror="true">
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make check'" level="info"/>
+    <exec executable="make" dir="${apr.dir}" failonerror="true">
+      <arg value="check"/>
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make install'" level="info"/>
+    <exec executable="make" dir="${apr.dir}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+  </target>
+  <target name="buildaprutil" depends="sanitytest">
+    <echo message="Building ${aprutil.dir}" level="info"/>
+    <echo message="Unpacking ${aprutil.file}" level="info"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${aprutil.file}"/>
+    </exec>
+    <echo message="Configuring ${aprutil.dir}" level="info"/>
+    <exec executable="bash" dir="${aprutil.dir}" failonerror="true">
+      <env key="CFLAGS" value="${cflags}"/>
+      <env key="CPPFLAGS" value="${cppflags}"/>
+      <arg value="configure"/>
+      <arg value="--prefix=${install.dir}"/>
+      <arg value="--with-apr=${install.dir}"/>
+      <arg value="--with-expat=${install.dir}"/>
+      <arg value="--with-crypto"/>
+      <arg value="--with-openssl=${install.dir}"/>
+    </exec>
+    <echo message="Running 'make'" level="info"/>
+    <exec executable="make" dir="${aprutil.dir}" failonerror="true">
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make check'" level="info"/>
+    <exec executable="make" dir="${aprutil.dir}" failonerror="true">
+      <arg value="check"/>
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make install'" level="info"/>
+    <exec executable="make" dir="${aprutil.dir}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+  </target>
+  <target name="buildcurl" depends="sanitytest">
+    <echo message="Building ${curl.dir}" level="info"/>
+    <echo message="Unpacking ${curl.file}" level="info"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${curl.file}"/>
+    </exec>
+    <echo message="Configuring ${curl.dir}" level="info"/>
+    <exec executable="bash" dir="${curl.dir}" failonerror="true">
+      <env key="CFLAGS" value="${cflags}"/>
+      <env key="CPPFLAGS" value="${cppflags}"/>
+      <arg value="configure"/>
+      <arg value="--prefix=${install.dir}"/>
+      <arg value="--enable-ipv6"/>
+      <arg value="--with-sysroot=${install.dir}"/>
+      <arg value="--disable-threaded-resolver"/>
+      <arg value="--enable-cookies"/>
+      <arg value="--with-zlib=${install.dir}"/>
+      <arg value="--with-ssl=${install.dir}"/>
+    </exec>
+    <echo message="Running 'make'" level="info"/>
+    <exec executable="make" dir="${curl.dir}" failonerror="true">
+      <arg value="${threads}"/>
+    </exec>
+    <!--  Skipping 'make check' due to false positives from valgrind
+    <echo message="Running 'make check'" level="info"/>
+    <exec executable="make" dir="${curl.dir}" failonerror="true">
+      <arg value="check"/>
+      <arg value="${threads}"/>
+    </exec>
+    -->
+    <exec executable="make" dir="${curl.dir}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+  </target>
+  <target name="buildexpat" depends="sanitytest">
+    <echo message="Building ${expat.dir}" level="info"/>
+    <echo message="Unpacking ${expat.file}" level="info"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${expat.file}"/>
+    </exec>
+    <echo message="Configuring ${expat.dir}" level="info"/>
+    <exec executable="bash" dir="${expat.dir}" failonerror="true">
+      <env key="CFLAGS" value="${cflags}"/>
+      <env key="CPPFLAGS" value="${cppflags} -DXML_LARGE_SIZE"/>
+      <arg value="configure"/>
+      <arg value="--prefix=${install.dir}"/>
+    </exec>
+    <echo message="Running 'make'" level="info"/>
+    <exec executable="make" dir="${expat.dir}" failonerror="true">
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make check'" level="info"/>
+    <exec executable="make" dir="${expat.dir}" failonerror="true">
+      <arg value="check"/>
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make install'" level="info"/>
+    <exec executable="make" dir="${expat.dir}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+  </target>
+  <target name="buildhttpd" depends="sanitytest">
+    <echo message="Building ${httpd.dir}" level="info"/>
+    <echo message="Unpacking ${httpd.file}" level="info"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${httpd.file}"/>
+    </exec>
+    <echo message="Configuring ${httpd.dir}" level="info"/>
+    <exec executable="bash" dir="${httpd.dir}" failonerror="true">
+      <env key="CFLAGS" value="${cflags}"/>
+      <env key="CPPFLAGS" value="${cppflags}"/>
+      <arg value="configure"/>
+      <arg value="--prefix=${install.dir}"/>
+      <arg value="--enable-ssl"/>
+      <arg value="--with-apr=${install.dir}"/>
+      <arg value="--with-apr-util=${install.dir}"/>
+      <arg value="--with-nghttp2=${install.dir}"/>
+      <arg value="--with-pcre=${install.dir}"/>
+      <arg value="--with-z=${install.dir}"/>
+      <arg value="--with-ssl=${install.dir}"/>
+    </exec>
+    <echo message="Running 'make'" level="info"/>
+    <exec executable="make" dir="${httpd.dir}" failonerror="true">
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make install'" level="info"/>
+    <exec executable="make" dir="${httpd.dir}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+  </target>
+  <target name="buildlibxml2" depends="sanitytest">
+    <echo message="Building ${libxml2.dir}" level="info"/>
+    <echo message="Unpacking ${libxml2.file}" level="info"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${libxml2.file}"/>
+    </exec>
+    <echo message="Configuring ${libxml2.dir}" level="info"/>
+    <exec executable="bash" dir="${libxml2.dir}" failonerror="true">
+      <env key="CFLAGS" value="${cflags}"/>
+      <env key="CPPFLAGS" value="${cppflags}"/>
+      <arg value="configure"/>
+      <arg value="--prefix=${install.dir}"/>
+      <arg value="--with-zlib=${install.dir}"/>
+      <arg value="--without-python"/>
+    </exec>
+    <echo message="Running 'make'" level="info"/>
+    <exec executable="make" dir="${libxml2.dir}" failonerror="true">
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make check'" level="info"/>
+    <exec executable="make" dir="${libxml2.dir}" failonerror="true">
+      <arg value="check"/>
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make install'" level="info"/>
+    <exec executable="make" dir="${libxml2.dir}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+  </target>
+  <target name="buildmodsecurity" depends="sanitytest">
+    <echo message="Building ${modsecurity.dir}" level="info"/>
+    <echo message="Unpacking ${modsecurity.file}" level="info"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${modsecurity.file}"/>
+    </exec>
+    <echo message="Configuring ${modsecurity.dir}" level="info"/>
+    <exec executable="bash" dir="${modsecurity.dir}" failonerror="true">
+      <env key="CFLAGS" value="${cflags}"/>
+      <env key="CPPFLAGS" value="${cppflags}"/>
+      <arg value="configure"/>
+      <arg value="--prefix=${install.dir}"/>
+      <arg value="--enable-pcre-study"/>
+      <arg value="--enable-pcre-jit"/>
+      <arg value="--with-curl=${install.dir}"/>
+      <arg value="--with-apxs=${install.dir}/bin/apxs"/>
+      <arg value="--with-pcre=${install.dir}"/>
+      <arg value="--with-apr=${install.dir}"/>
+      <arg value="--with-apu=${install.dir}"/>
+      <arg value="--with-libxml=${install.dir}"/>
+      <arg value="--without-lua"/>
+    </exec>
+    <echo message="Running 'make'" level="info"/>
+    <exec executable="make" dir="${modsecurity.dir}" failonerror="true">
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make check'" level="info"/>
+    <exec executable="make" dir="${modsecurity.dir}" failonerror="true">
+      <arg value="check"/>
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make install'" level="info"/>
+    <exec executable="make" dir="${modsecurity.dir}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+    <echo message="Fixing permissions on mod_security2.so" level="info"/>
+    <exec executable="chmod" dir="${install.dir}/modules" failonerror="true">
+      <arg value="a+x"/>
+      <arg value="mod_security2.so"/>
+    </exec>
+  </target>
+  <target name="buildnghttp2" depends="sanitytest">
+    <echo message="Building ${nghttp2.dir}" level="info"/>
+    <echo message="Unpacking ${nghttp2.file}" level="info"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${nghttp2.file}"/>
+    </exec>
+    <echo message="Configuring ${nghttp2.dir}" level="info"/>
+    <exec executable="bash" dir="${nghttp2.dir}" failonerror="true">
+      <env key="CFLAGS" value="${cflags}"/>
+      <env key="CPPFLAGS" value="${cppflags}"/>
+      <arg value="configure"/>
+      <arg value="--prefix=${install.dir}"/>
+      <arg value="--with-libxml2=${install.dir}"/>
+    </exec>
+    <echo message="Running 'make'" level="info"/>
+    <exec executable="make" dir="${nghttp2.dir}" failonerror="true">
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make check'" level="info"/>
+    <exec executable="make" dir="${nghttp2.dir}" failonerror="true">
+      <arg value="check"/>
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make install'" level="info"/>
+    <exec executable="make" dir="${nghttp2.dir}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+  </target>
+  <target name="buildopenssl" depends="sanitytest">
+    <echo message="Building ${openssl.dir}" level="info"/>
+    <echo message="Unpacking ${openssl.file}" level="info"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${openssl.file}"/>
+    </exec>
+    <echo message="Configuring ${openssl.dir}" level="info"/>
+    <exec executable="bash" dir="${openssl.dir}" failonerror="true">
+      <env key="CFLAGS" value="${cflags}"/>
+      <env key="CPPFLAGS" value="${cppflags}"/>
+      <arg value="config"/>
+      <arg value="--prefix=${install.dir}"/>
+      <arg value="--openssldir=${install.dir}"/>
+      <arg value="threads"/>
+      <arg value="shared"/>
+      <arg value="no-comp"/>
+      <arg value="${cflags}"/>
+    </exec>
+    <echo message="Running 'make depend'" level="info"/>
+    <exec executable="make" dir="${openssl.dir}" failonerror="true">
+      <arg value="depend"/>
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make'" level="info"/>
+    <exec executable="make" dir="${openssl.dir}" failonerror="true">
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make test'" level="info"/>
+    <exec executable="make" dir="${openssl.dir}" failonerror="true">
+      <arg value="test"/>
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make install'" level="info"/>
+    <exec executable="make" dir="${openssl.dir}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+  </target>
+  <target name="buildpcre" depends="sanitytest">
+    <echo message="Building ${pcre.dir}" level="info"/>
+    <echo message="Unpacking ${pcre.file}" level="info"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${pcre.file}"/>
+    </exec>
+    <echo message="Configuring ${pcre.dir}" level="info"/>
+    <exec executable="bash" dir="${pcre.dir}" failonerror="true">
+      <env key="CFLAGS" value="${cflags}"/>
+      <env key="CPPFLAGS" value="${cppflags}"/>
+      <arg value="configure"/>
+      <arg value="--prefix=${install.dir}"/>
+      <arg value="--enable-pcre16"/>
+      <arg value="--enable-pcre32"/>
+      <arg value="--enable-jit"/>
+      <arg value="--enable-utf"/>
+    </exec>
+    <echo message="Running 'make'" level="info"/>
+    <exec executable="make" dir="${pcre.dir}" failonerror="true">
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make check'" level="info"/>
+    <exec executable="make" dir="${pcre.dir}" failonerror="true">
+      <arg value="check"/>
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make install'" level="info"/>
+    <exec executable="make" dir="${pcre.dir}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+  </target>
+  <target name="buildzlib" depends="sanitytest">
+    <echo message="Building ${zlib.dir}" level="info"/>
+    <echo message="Unpacking ${zlib.file}" level="info"/>
+    <exec executable="tar" failonerror="true">
+      <arg value="-xf"/>
+      <arg value="${zlib.file}"/>
+    </exec>
+    <echo message="Running 'make distclean'" level="info"/>
+    <exec executable="make" dir="${zlib.dir}" failonerror="true">
+      <arg value="distclean"/>
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Configuring ${zlib.dir}" level="info"/>
+    <exec executable="bash" dir="${zlib.dir}" failonerror="true">
+      <env key="CFLAGS" value="${cflags} -fPIC"/>
+      <env key="CPPFLAGS" value="${cppflags}"/>
+      <arg value="configure"/>
+      <arg value="--prefix=${install.dir}"/>
+      <arg value="--64"/>
+      <arg value="--shared"/>
+      <arg value="--libdir=${install.dir}/lib"/>
+      <arg value="--sharedlibdir=${install.dir}/lib"/>
+    </exec>
+    <echo message="Running 'make'" level="info"/>
+    <exec executable="make" dir="${zlib.dir}" failonerror="true">
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make check'" level="info"/>
+    <exec executable="make" dir="${zlib.dir}" failonerror="true">
+      <arg value="check"/>
+      <arg value="${threads}"/>
+    </exec>
+    <echo message="Running 'make install'" level="info"/>
+    <exec executable="make" dir="${zlib.dir}" failonerror="true">
+      <arg value="install"/>
+    </exec>
+  </target>
+</project>

@@ -47,7 +47,7 @@
   <property name="threads" value="-j6"/>
   <property environment="env"/>
   <!-- DO NOT MODIFY ANYTHING BELOW HERE -->
-  <target name="main">
+  <target name="main" description="Build everything then clean up">
     <antcall target="clean"/>
     <antcall target="buildexpat"/>
     <antcall target="buildopenssl"/>
@@ -64,7 +64,7 @@
     <antcall target="installdispatcher"/>
     <antcall target="clean"/>
   </target>
-  <target name="sanitytest">
+  <target name="sanitytest" description="Verify all required files are present">
     <echo message="INFO: Checking we have all the code we need"/>
     <available file="${apr.file}" property="apr.file.exists"/>
     <available file="${aprutil.file}" property="aprutil.file.exists"/>
@@ -94,9 +94,8 @@
     <fail message="${zlib.file} does not exist" unless="zlib.file.exists"/>
     <echo message="INFO: Check complete"/>
   </target>
-  <target name="clean">
+  <target name="clean" description="Delete all working directories">
     <echo message="Removing build artifacts" level="info"/>
-    <delete dir="chrpath"/>
     <delete dir="${apr.dir}"/>
     <delete dir="${aprutil.dir}"/>
     <delete dir="${chrpath.dir}"/>
@@ -112,7 +111,7 @@
     <delete dir="${zlib.dir}"/>
     <delete dir="${tools.dir}"/>
   </target>
-  <target name="fixrpath" depends="sanitytest">
+  <target name="fixrpath" depends="sanitytest" description="Update the baked-in rpath on all binaries to be relative to $ORIGIN">
     <echo message="Fixing ELF rpaths"/>
     <echo message="Building ${chrpath.dir}" level="info"/>
     <echo message="Unpacking ${chrpath.file}" level="info"/>
@@ -146,7 +145,7 @@
       <arg value="${install.dir}"/>
     </exec>
   </target>
-  <target name="installdispatcher" depends="sanitytest">
+  <target name="installdispatcher" depends="sanitytest" description="Install the dispatcher module">
     <echo message="Installing AEM Dispatcher" level="info"/>
     <echo message="Extracting ${dispatcher.file}" level="info"/>
     <mkdir dir="${dispatcher.dir}"/>
@@ -163,7 +162,7 @@
       </fileset>
     </move>
   </target>
-  <target name="buildapr" depends="sanitytest">
+  <target name="buildapr" depends="sanitytest" description="Build the Apache Portable Runtime">
     <echo message="Building ${apr.dir}" level="info"/>
     <echo message="Unpacking ${apr.file}" level="info"/>
     <exec executable="tar" failonerror="true">
@@ -194,7 +193,7 @@
       <arg value="install"/>
     </exec>
   </target>
-  <target name="buildaprutil" depends="sanitytest">
+  <target name="buildaprutil" depends="sanitytest" description="Build the Apache Portable Runtime Utility">
     <echo message="Building ${aprutil.dir}" level="info"/>
     <echo message="Unpacking ${aprutil.file}" level="info"/>
     <exec executable="tar" failonerror="true">
@@ -226,7 +225,7 @@
       <arg value="install"/>
     </exec>
   </target>
-  <target name="buildcurl" depends="sanitytest">
+  <target name="buildcurl" depends="sanitytest" description="Build cURL">
     <echo message="Building ${curl.dir}" level="info"/>
     <echo message="Unpacking ${curl.file}" level="info"/>
     <exec executable="tar" failonerror="true">
@@ -261,7 +260,7 @@
       <arg value="install"/>
     </exec>
   </target>
-  <target name="buildexpat" depends="sanitytest">
+  <target name="buildexpat" depends="sanitytest" description="Build the Expat XML parser">
     <echo message="Building ${expat.dir}" level="info"/>
     <echo message="Unpacking ${expat.file}" level="info"/>
     <exec executable="tar" failonerror="true">
@@ -289,7 +288,7 @@
       <arg value="install"/>
     </exec>
   </target>
-  <target name="buildhttpd" depends="sanitytest">
+  <target name="buildhttpd" depends="sanitytest" description="Build the Apache HTTPD server">
     <echo message="Building ${httpd.dir}" level="info"/>
     <echo message="Unpacking ${httpd.file}" level="info"/>
     <exec executable="tar" failonerror="true">
@@ -319,7 +318,7 @@
       <arg value="install"/>
     </exec>
   </target>
-  <target name="buildlibxml2" depends="sanitytest">
+  <target name="buildlibxml2" depends="sanitytest" description="Build libxml2">
     <echo message="Building ${libxml2.dir}" level="info"/>
     <echo message="Unpacking ${libxml2.file}" level="info"/>
     <exec executable="tar" failonerror="true">
@@ -349,7 +348,7 @@
       <arg value="install"/>
     </exec>
   </target>
-  <target name="buildmodsecurity" depends="sanitytest">
+  <target name="buildmodsecurity" depends="sanitytest" description="Build the mod_security httpd module">
     <echo message="Building ${modsecurity.dir}" level="info"/>
     <echo message="Unpacking ${modsecurity.file}" level="info"/>
     <exec executable="tar" failonerror="true">
@@ -391,7 +390,7 @@
       <arg value="mod_security2.so"/>
     </exec>
   </target>
-  <target name="buildnghttp2" depends="sanitytest">
+  <target name="buildnghttp2" depends="sanitytest" description="Build the nghttp2 library">
     <echo message="Building ${nghttp2.dir}" level="info"/>
     <echo message="Unpacking ${nghttp2.file}" level="info"/>
     <exec executable="tar" failonerror="true">
@@ -420,7 +419,7 @@
       <arg value="install"/>
     </exec>
   </target>
-  <target name="buildopenssl" depends="sanitytest">
+  <target name="buildopenssl" depends="sanitytest" description="Build openssl">
     <echo message="Building ${openssl.dir}" level="info"/>
     <echo message="Unpacking ${openssl.file}" level="info"/>
     <exec executable="tar" failonerror="true">
@@ -458,7 +457,7 @@
       <arg value="install"/>
     </exec>
   </target>
-  <target name="buildpcre" depends="sanitytest">
+  <target name="buildpcre" depends="sanitytest" description="Build the Perl Compatible Regular Expressions library">
     <echo message="Building ${pcre.dir}" level="info"/>
     <echo message="Unpacking ${pcre.file}" level="info"/>
     <exec executable="tar" failonerror="true">
@@ -490,7 +489,7 @@
       <arg value="install"/>
     </exec>
   </target>
-  <target name="buildzlib" depends="sanitytest">
+  <target name="buildzlib" depends="sanitytest" description="Build the zlib library">
     <echo message="Building ${zlib.dir}" level="info"/>
     <echo message="Unpacking ${zlib.file}" level="info"/>
     <exec executable="tar" failonerror="true">
